@@ -1,5 +1,4 @@
 const fs = require('fs')
-const _ = require('lodash')
 
 class OctopusGrid {
   constructor(matrix) {
@@ -63,49 +62,32 @@ class OctopusGrid {
 }
 
 function xyz(input) {
-  const grid = new OctopusGrid(
-    input
-      .trim()
-      .split('\n')
-      .map((line) =>
-        line
-          .trim()
-          .split('')
-          .map((n) => parseInt(n, 10))
-      )
-  )
+  const matrix = input
+    .trim()
+    .split('\n')
+    .map((line) =>
+      line
+        .trim()
+        .split('')
+        .map((n) => parseInt(n, 10))
+    )
 
-  let sum = 0
+  const octopusGrid = new OctopusGrid(matrix)
 
-  for (let i = 0; i < 100; i++) {
-    sum += grid.step()
-  }
+  let totalFlashesAfter100Steps = 0
+  let steps = 0
+  let flashesThisStep = 0
 
-  return sum
-}
+  do {
+    steps += 1
+    totalFlashesAfter100Steps += flashesThisStep = octopusGrid.step()
 
-function xyz2(input) {
-  const grid = new OctopusGrid(
-    input
-      .trim()
-      .split('\n')
-      .map((line) =>
-        line
-          .trim()
-          .split('')
-          .map((n) => parseInt(n, 10))
-      )
-  )
+    if (steps === 100) {
+      console.info('Total flashes after 100 steps', totalFlashesAfter100Steps)
+    }
+  } while (flashesThisStep !== 100)
 
-  let steps = 1
-  let flashesThisStep = grid.step()
-
-  while (flashesThisStep !== 100) {
-    flashesThisStep = grid.step()
-    steps++
-  }
-
-  return steps
+  console.info('Sync after', steps)
 }
 
 const input = fs.readFileSync(`${__dirname}/input.txt`, 'utf-8')
@@ -122,8 +104,5 @@ const example = `5483143223
 5283751526
 `
 
-console.log(xyz(example))
-console.log(xyz(input))
-
-console.log(xyz2(example))
-console.log(xyz2(input))
+xyz(example)
+xyz(input)
