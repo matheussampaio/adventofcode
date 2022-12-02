@@ -1,6 +1,4 @@
-const fs = require('fs')
-
-require('../utils')
+const { read } = require('../utils')
 
 function maxCalories(input, limit = 1) {
   const bags = input.trim().split('\n\n')
@@ -12,7 +10,7 @@ function maxCalories(input, limit = 1) {
   return calories.slice(0, limit).sum()
 }
 
-const input = fs.readFileSync(`${__dirname}/input.txt`, 'utf-8')
+const input = read(`${__dirname}/input.txt`)
 
 const example = `1000
 2000

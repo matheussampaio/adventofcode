@@ -1,8 +1,4 @@
-// Object.defineProperty(Array.prototype, 'asc', {
-//   value: function(compare) {
-//     return this.sort((a, b) => a - b)
-//   }
-// });
+const fs = require('fs')
 
 Object.defineProperty(Array.prototype, 'toInt', {
   value: function() {
@@ -28,4 +24,12 @@ Object.defineProperty(Array.prototype, 'desc', {
   }
 })
 
+
+function read(filename) {
+  return fs.readFileSync(filename, 'utf-8')
+}
+
+module.exports = {
+  read
+}
 
