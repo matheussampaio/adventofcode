@@ -21,7 +21,7 @@ const SCORES = {
 const CHEATSHEET = {
   'A_X': 'Z', // rock <- lose = scissors
   'A_Y': 'X', // rock <- draw = rock
-  'A_Z': 'Y', // rock <- win = paper (Y)
+  'A_Z': 'Y', // rock <- win = paper
 
   'B_X': 'X', // paper <- lose = rock
   'B_Y': 'Y', // paper <- draw = paper
@@ -33,8 +33,6 @@ const CHEATSHEET = {
 }
 
 function calcScore(input, q2 = false) {
-
-
   return input
     .trim()
     .split('\n')
