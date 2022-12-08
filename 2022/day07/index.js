@@ -3,19 +3,7 @@ const _ = require('lodash')
 const { read } = require('../utils')
 
 function parseFileTree(input) {
-  const root = {
-    name: '/',
-    nodes: {},
-    size: function () {
-      let sum = 0
-
-      for (const node of Object.values(this.nodes)) {
-        sum += node.size()
-      }
-
-      return sum
-    }
-  }
+  const root = new Folder('/')
 
   let cwd = root
 
@@ -23,33 +11,15 @@ function parseFileTree(input) {
     if (line.match(/dir .+/)) {
       const foldername = line.split(' ')[1]
 
-      cwd.nodes[foldername] = cwd.nodes[foldername] ?? {
-        name: foldername,
-        type: 'folder',
-        parent: cwd,
-        nodes: {},
-        size: function () {
-          let sum = 0
-
-          for (const node of Object.values(this.nodes)) {
-            sum += node.size()
-          }
-
-          return sum
-        }
-      }
+      cwd.mkdir(foldername)
     }
 
     if (line.match(/\d+ .+/)) {
       const [filesize, filename] = line.split(' ')
 
-      cwd.nodes[filename] = {
-        name: filename,
-        type: 'file',
-        parent: cwd,
-        size: () => parseInt(filesize, 10)
-      }
+      cwd.touch(filename, filesize)
     }
+
 
     if (line.match(/^\$ cd .+/)) {
       const path = line.split(' ')[2]
@@ -59,7 +29,7 @@ function parseFileTree(input) {
       } else if (path === '..') {
         cwd = cwd.parent
       } else {
-        cwd = cwd.nodes[path]
+        cwd = cwd.children[path]
       }
     }
   }
@@ -76,12 +46,12 @@ function findBigFolders(input) {
   while (queue.length) {
     const node = queue.shift()
 
-    if (node.size && node.size() <= 100000) {
-      sum += node.size()
+    if (node.size <= 100000) {
+      sum += node.size
     }
 
-    for (const child of Object.values(node.nodes)) {
-      if (child.type === 'folder') {
+    for (const child of Object.values(node.children)) {
+      if (child instanceof Folder) {
         queue.push(child)
       }
     }
@@ -105,20 +75,52 @@ function findBestFolderToDelete(input) {
   while (queue.length) {
     const node = queue.shift()
 
-    const size = node.size()
+    const size = node.size
 
     if (size >= spaceNeeded && size <= smallestFolder) {
       smallestFolder = size
     }
 
-    for (const child of Object.values(node.nodes)) {
-      if (child.type === 'folder') {
+    for (const child of Object.values(node.children)) {
+      if (child instanceof Folder) {
         queue.push(child)
       }
     }
   }
 
   return smallestFolder
+}
+
+class File {
+  constructor(name, size, parent) {
+    this.name = name
+    this.parent = parent
+    this.size = typeof size === 'string' ? parseInt(size, 10) : size
+  }
+}
+
+class Folder {
+  constructor(name, parent) {
+    this.name = name
+    this.parent = parent
+    this.children = {}
+  }
+
+  get size() {
+    return Object.values(this.children)
+      .map(child => child.size)
+      .reduce((sum, curr) => sum + curr, 0)
+  }
+
+  mkdir(name) {
+    if (this.children[name] == null) {
+      this.children[name] = new Folder(name, this)
+    }
+  }
+
+  touch(name, size) {
+    this.children[name] = new File(name, size, this)
+  }
 }
 
 const input = read(`${__dirname}/input.txt`)
