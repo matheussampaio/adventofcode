@@ -12,6 +12,12 @@ Object.defineProperty(Array.prototype, 'sum', {
   }
 })
 
+Object.defineProperty(Array.prototype, 'mult', {
+  value: function() {
+    return this.reduce((cur, sum) => cur * sum, 1)
+  }
+})
+
 Object.defineProperty(Array.prototype, 'asc', {
   value: function() {
     return this.sort((a, b) => a - b)
