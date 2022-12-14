@@ -10,7 +10,7 @@ function topOfTheStacks(input, q2 = false) {
   const re = /move (\d+) from (\d+) to (\d+)/
 
   for (const move of moves.trim().split('\n')) {
-    const [times, from, to] = re.exec(move).slice(1).toInt()
+    const [times, from, to] = re.exec(move).slice(1).int()
 
     if (q2) {
         stacks[to - 1].push(...stacks[from - 1].splice(stacks[from - 1].length - times))

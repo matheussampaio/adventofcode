@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-Object.defineProperty(Array.prototype, 'toInt', {
+Object.defineProperty(Array.prototype, 'int', {
   value: function() {
     return this.map((n) => parseInt(n, 10))
   }

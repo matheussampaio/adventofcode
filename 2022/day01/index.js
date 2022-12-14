@@ -4,7 +4,7 @@ function maxCalories(input, limit = 1) {
   const bags = input.trim().split('\n\n')
 
   const calories = bags
-    .map(bag => bag.split('\n').toInt().sum())
+    .map(bag => bag.split('\n').int().sum())
     .desc()
 
   return calories.slice(0, limit).sum()

@@ -6,7 +6,7 @@ function fullyContains(input) {
   return _.chain(input)
     .trim()
     .split('\n')
-    .map(r => r.replace(',', '-').split('-').toInt())
+    .map(r => r.replace(',', '-').split('-').int())
     .filter(([s1, e1, s2, e2]) => {
       if (s1 <= s2 && e1 >= e2) {
         return true
@@ -26,7 +26,7 @@ function overlaps(input) {
   return _.chain(input)
     .trim()
     .split('\n')
-    .map(r => r.replace(',', '-').split('-').toInt())
+    .map(r => r.replace(',', '-').split('-').int())
     .filter(([s1, e1, s2, e2]) => {
       if (s1 >= s2 && s1 <= e2) {
         return true
