@@ -17,80 +17,67 @@ function calc1(input, steps = 30) {
     }
   })
 
-  for (let i = 1; i <= steps; i++) {
-    for (const startingFrom in valves) {
-      xyz(i, valves, startingFrom, i)
+  // const queues = {}
+
+  // _.range(steps + 1).forEach((n) => queues[n] = [])
+
+  // queues[1].push({ steps, at: valves.AA, flow: 0, on: {} })
+  const queue = [{ steps, at: valves.AA, flow: 0, on: {} }]
+
+  let maxFlow = 0
+
+  // for (let i = 1; i <= steps; i++) {
+  //   console.log('processing size', i)
+  //   console.log(`before prune, queue has ${queues[i].length} items`)
+
+    // const queue = queues[1].sort((t1, t2) => t2.flow - t1.flow).slice(0, 10000)
+
+    while (queue.length) {
+      const c = queue.pop()
+
+      console.log(c)
+
+      if (c.flow > maxFlow) {
+        maxFlow = c.flow
+      }
+
+      if (c.steps <= 0) {
+        continue
+      }
+
+      // go everywhere without turning on this valve
+      for (const tunnel of c.at.tunnels) {
+        queue.push({
+          steps: c.steps - 1,
+          at: valves[tunnel],
+          flow: c.flow,
+          on: {
+            ...c.on
+          }
+        })
+      }
+
+      // only if current valve is OFF
+      if (c.on[c.at.id] == null && c.flow > 0) {
+        c.on[c.at.id] = true
+        c.steps -= 1
+        c.flow += c.steps * c.at.rate
+
+        for (const tunnel of c.at.tunnels) {
+          queue.push({
+            steps: c.steps - 1,
+            at: valves[tunnel],
+            flow: c.flow,
+            on: {
+              ...c.on
+            }
+          })
+        }
+      }
     }
-  }
-
-  return dp[steps - 1]['AA']
-}
-
-function xyz(dp, valves, startingFrom, steps) {
-  if (steps <= 1) {
-    return dp[steps][startingFrom] = 0
-  }
-
-  if (steps <= 2) {
-    return dp[steps][startingFrom] = valves[startingFrom].rate
-  }
-
-  if (dp[steps][startingFrom]) {
-    return dp[steps][startingFrom]
-  }
-
-  return dp[steps][startingFrom] = Math.max(
-    ...valves[startingFrom].tunnels.map(v => xyz(dp, valves, v, steps - 1)), // maxOfGoingDirectlyToOtherValves
-    ...valves[startingFrom].tunnels.map(v => xyz(dp, valves, v, steps - 2)).map(n => n + valves[startingFrom].rate), // maxOfGoingToOtherValvesAfterTurningCurrentValveOn
-  )
-
-  // const queue = [
-  //   { steps, at: valves[startingFrom], flow: 0, on: {} }
-  // ]
-
-  // while (queue.length) {
-  //   const c = queue.shift()
-
-  //   if (c.flow > maxFlow) {
-  //     maxFlow = c.flow
-  //   }
-
-  //   if (c.steps <= 0 || Object.keys(c.on).length >= Object.keys(valves).length) {
-  //     continue
-  //   }
-
-  //   // go everywhere without turning on this valve
-  //   for (const tunnel of c.at.tunnels) {
-  //     queue.push({
-  //       steps: c.steps - 1,
-  //       at: valves[tunnel],
-  //       flow: c.flow,
-  //       on: {
-  //         ...c.on
-  //       }
-  //     })
-  //   }
-
-  //   // only if current valve is OFF
-  //   if (c.on[c.at.id] == null) {
-  //     c.on[c.at.id] = true
-  //     c.steps -= 1
-  //     c.flow += c.steps * c.at.rate
-
-  //     for (const tunnel of c.at.tunnels) {
-  //       queue.push({
-  //         steps: c.steps - 1,
-  //         at: valves[tunnel],
-  //         flow: c.flow,
-  //         on: {
-  //           ...c.on
-  //         }
-  //       })
-  //     }
-  //   }
   // }
 
-  // return { maxFlow }
+  return { maxFlow }
 }
 
 const input = read(`${__dirname}/input.txt`)
@@ -106,5 +93,5 @@ Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II`
 
-console.log(calc1(example, 1))
+console.log(calc1(example))
 // console.log(calc1(input))
