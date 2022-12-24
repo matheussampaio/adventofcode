@@ -2,82 +2,131 @@ const _ = require('lodash')
 
 const { read } = require('../utils')
 
-function calc1(input, steps = 30) {
-  const dp = Array.from({ length: steps}, () => {})
-
-  const valves = {}
-
-  input.trim().split('\n').forEach(line => {
-    const [id, rate, tunnels] = line.match(/Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.+)/).slice(1)
-
-    valves[id] = {
-      id,
-      rate: parseInt(rate, 10),
-      tunnels: tunnels.split(', ')
-    }
-  })
-
-  // const queues = {}
-
-  // _.range(steps + 1).forEach((n) => queues[n] = [])
-
-  // queues[1].push({ steps, at: valves.AA, flow: 0, on: {} })
+function calc1(valves, targets, dt, steps) {
   const queue = [{ steps, at: valves.AA, flow: 0, on: {} }]
 
   let maxFlow = 0
 
-  // for (let i = 1; i <= steps; i++) {
-  //   console.log('processing size', i)
-  //   console.log(`before prune, queue has ${queues[i].length} items`)
+  while (queue.length) {
+    const c = queue.shift()
 
-    // const queue = queues[1].sort((t1, t2) => t2.flow - t1.flow).slice(0, 10000)
+    if (c.flow > maxFlow) {
+      maxFlow = c.flow
+    }
+
+    targets
+      .filter(v => c.on[v.name] == null)
+      .filter(v => c.steps - dt[c.at.name][v.name] >= 0)
+      .forEach(v => {
+        const steps = c.steps - dt[c.at.name][v.name] - 1
+
+        queue.push({
+          steps,
+          at: valves[v.name],
+          flow: c.flow + steps * valves[v.name].flow,
+          on: {
+            ...c.on,
+            [v.name]: true
+          }
+        })
+      })
+  }
+
+  return maxFlow
+}
+
+function createDistanceTable(valves) {
+  const dt = {}
+
+  for (const name in valves) {
+    dt[name] = {}
+
+    const queue = [[name, 0]]
+    const visited = {}
 
     while (queue.length) {
-      const c = queue.pop()
+      const [v, n] = queue.shift()
 
-      console.log(c)
-
-      if (c.flow > maxFlow) {
-        maxFlow = c.flow
-      }
-
-      if (c.steps <= 0) {
+      if (visited[v]) {
         continue
       }
 
-      // go everywhere without turning on this valve
-      for (const tunnel of c.at.tunnels) {
-        queue.push({
-          steps: c.steps - 1,
-          at: valves[tunnel],
-          flow: c.flow,
-          on: {
-            ...c.on
-          }
-        })
-      }
+      visited[v] = true
+      dt[name][v] = n
 
-      // only if current valve is OFF
-      if (c.on[c.at.id] == null && c.flow > 0) {
-        c.on[c.at.id] = true
-        c.steps -= 1
-        c.flow += c.steps * c.at.rate
-
-        for (const tunnel of c.at.tunnels) {
-          queue.push({
-            steps: c.steps - 1,
-            at: valves[tunnel],
-            flow: c.flow,
-            on: {
-              ...c.on
-            }
-          })
-        }
+      for (const c of valves[v].tunnels) {
+        queue.push([c, n + 1])
       }
     }
-  // }
+  }
 
-  return { maxFlow }
+  return dt
+}
+
+function calc2(valves, dt) {
+  let bestScore = Infinity
+  let bestLeft = null
+  let bestRight = null
+
+  const calcScore = (left, right) => {
+    let score = 0
+
+    for (let i = 0; i < left.length; i++) {
+      for (let j = i + 1; j < left.length; j++) {
+        score += dt[left[i].name][left[j].name]
+      }
+    }
+
+    for (let i = 0; i < right.length; i++) {
+      for (let j = i + 1; j < right.length; j++) {
+        score += dt[right[i].name][right[j].name]
+      }
+    }
+
+    return score
+  }
+
+  for (let i = 0; i < 100000; i++) {
+    const left = []
+    const right = []
+
+    for (const v of Object.values(valves).filter(v => v.flow > 0)) {
+      if (Math.random() > 0.33) {
+        left.push(v)
+      } else {
+        right.push(v)
+      }
+    }
+
+    const score = calcScore(left, right, dt)
+
+    if (score < bestScore) {
+      bestScore = score
+      bestLeft = left
+      bestRight = right
+    }
+  }
+
+  return calc1(valves, bestLeft, dt, 26) + calc1(valves, bestRight, dt, 26)
+}
+
+function main(input) {
+  let valves = {}
+
+  input.trim().split('\n').forEach(line => {
+    const [name, flow, tunnels] = line.match(/Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.+)/).slice(1)
+
+    valves[name] = {
+      name,
+      flow: parseInt(flow, 10),
+      tunnels: tunnels.split(', ')
+    }
+  })
+
+  const dt = createDistanceTable(valves)
+
+  console.log(calc1(valves, Object.values(valves).filter(v => v.flow > 0), dt, 30))
+  console.log(calc2(valves, dt))
 }
 
 const input = read(`${__dirname}/input.txt`)
@@ -93,5 +142,6 @@ Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II`
 
-console.log(calc1(example))
-// console.log(calc1(input))
+// main(example)
+main(input)
+
