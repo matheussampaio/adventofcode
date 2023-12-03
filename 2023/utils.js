@@ -1,5 +1,11 @@
 const fs = require('fs')
 
+Object.defineProperty(String.prototype, 'int', {
+  value: function(base = 10) {
+    return parseInt(this, base)
+  }
+})
+
 Object.defineProperty(Array.prototype, 'int', {
   value: function() {
     return this.map((n) => parseInt(n, 10))
@@ -38,4 +44,3 @@ function read(filename) {
 module.exports = {
   read
 }
-
