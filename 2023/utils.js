@@ -36,6 +36,17 @@ Object.defineProperty(Array.prototype, 'desc', {
   }
 })
 
+Object.defineProperty(Array.prototype, 'max', {
+  value: function() {
+    return Math.max(...this)
+  }
+})
+
+Object.defineProperty(Array.prototype, 'min', {
+  value: function() {
+    return Math.min(...this)
+  }
+})
 
 function read(filename) {
   return fs.readFileSync(filename, 'utf-8')
