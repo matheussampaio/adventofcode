@@ -120,5 +120,5 @@ humidity-to-location map:
 console.log(main(example))
 console.log(main(input))
 
-console.log(main(example, true))
-console.log(main(input, true))
+// console.log(main(example, true))
+// console.log(main(input, true))

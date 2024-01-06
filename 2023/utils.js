@@ -1,4 +1,5 @@
 const fs = require('fs')
+const _ = require('lodash')
 
 Object.defineProperty(String.prototype, 'int', {
   value: function(base = 10) {
@@ -45,6 +46,12 @@ Object.defineProperty(Array.prototype, 'max', {
 Object.defineProperty(Array.prototype, 'min', {
   value: function() {
     return Math.min(...this)
+  }
+})
+
+Object.defineProperty(Array.prototype, 'chunk', {
+  value: function(size) {
+    return _.chunk(this, size)
   }
 })
 
