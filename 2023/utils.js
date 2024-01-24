@@ -55,6 +55,29 @@ Object.defineProperty(Array.prototype, 'chunk', {
   }
 })
 
+Object.defineProperty(Array.prototype, 'fill', {
+  value: function (value) {
+    return _.chunk(this, size)
+  }
+})
+
+Array.create = function create({ rows, columns, fill = null }) {
+  const arr = []
+
+  for (let y = 0; y < columns; y++) {
+    const row = []
+
+    for (let x = 0; x < rows; x++) {
+      row.push(fill)
+    }
+
+    arr.push(row)
+  }
+
+  return arr
+}
+
+
 function read(filename) {
   return fs.readFileSync(filename, 'utf-8')
 }
