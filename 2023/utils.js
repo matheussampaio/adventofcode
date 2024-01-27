@@ -61,6 +61,18 @@ Object.defineProperty(Array.prototype, 'fill', {
   }
 })
 
+Object.defineProperty(Array.prototype, 'copy', {
+  value: function () {
+    return _.cloneDeep(this)
+  }
+})
+
+Object.defineProperty(Array.prototype, 'empty', {
+  value: function () {
+    return this.length === 0
+  }
+})
+
 Array.create = function create({ rows, columns, fill = null }) {
   const arr = []
 
