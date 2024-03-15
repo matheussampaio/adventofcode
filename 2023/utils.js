@@ -73,6 +73,12 @@ Object.defineProperty(Array.prototype, 'empty', {
   }
 })
 
+Object.defineProperty(Array.prototype, 'last', {
+  value: function (idx = 1) {
+    return this[this.length - idx]
+  }
+})
+
 Array.create = function create({ rows, columns, fill = null }) {
   const arr = []
 
